@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "start": "node ./build/index.js"
+    "start": "node ./build/index.js",
+    "dev": "yarn build & yarn start"
   },
   "dependencies": {
     "@types/node": "^16.11.1",

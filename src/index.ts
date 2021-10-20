@@ -1,4 +1,7 @@
 import { gql, ApolloServer } from "apollo-server";
+import {
+  ApolloServerPluginLandingPageProductionDefault
+} from "apollo-server-core";
 
 const typeDefs = gql`
   # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
@@ -18,24 +21,28 @@ const typeDefs = gql`
 `;
 
 const books = [
-    {
-        title: 'The Awakening',
-        author: 'Kate Chopin',
-    },
-    {
-        title: 'City of Glass',
-        author: 'Paul Auster',
-    },
+  {
+    title: 'The Awakening',
+    author: 'Kate Chopin',
+  },
+  {
+    title: 'City of Glass',
+    author: 'Paul Auster',
+  },
 ];
 
 const resolvers = {
-    Query: {
-        books: () => books,
-    },
+  Query: {
+    books: () => books,
+  },
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginLandingPageProductionDefault({ footer: false })]
+});
 
 server.listen(3000).then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
+  console.log(`🚀  Server ready at ${url}`);
 });
