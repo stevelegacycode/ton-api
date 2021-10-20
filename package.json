@@ -1,0 +1,18 @@
+{
+  "name": "ton-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ex3ndr/ton-api.git",
+  "author": "Steve Korshakov <steve@korshakov.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./build/index.js"
+  },
+  "dependencies": {
+    "@types/node": "^16.11.1",
+    "apollo-server": "^3.4.0",
+    "graphql": "^15.6.1",
+    "typescript": "^4.4.4"
+  }
+}
