@@ -1,46 +1,56 @@
 import { gql, ApolloServer } from "apollo-server";
 import {
-  ApolloServerPluginLandingPageProductionDefault
+  ApolloServerPluginLandingPageGraphQLPlayground
 } from "apollo-server-core";
+import { TonClient } from 'ton';
+
+const client = new TonClient({ endpoint: 'https://ton-api.tonwhales.com/jsonRPC' })
 
 const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
+  
+  type Block {
+    id: ID!
+    seq: Int!
+    shards: [Shard!]!
   }
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
+  type Shard {
+    id: ID!
+    seq: Int!
+    workchain: Int!
+    shard: String!
+  }
+
   type Query {
-    books: [Book]
+    block(seq: Int!): Block
   }
 `;
 
-const books = [
-  {
-    title: 'The Awakening',
-    author: 'Kate Chopin',
-  },
-  {
-    title: 'City of Glass',
-    author: 'Paul Auster',
-  },
-];
-
 const resolvers = {
+  Block: {
+    id: (src: any) => 'block:' + src.seq
+  },
+  Shard: {
+    id: (src: any) => 'shard:' + src.workchain + ':' + src.shard + ':' + src.seqno,
+    seq: (src: any) => src.seqno
+  },
   Query: {
-    books: () => books,
+    block: async (_: any, args: { seq: number }) => {
+      let mc = await client.getMasterchainInfo();
+      let shards = await client.getWorkchainShards(args.seq);
+      shards.unshift({ workchain: -1, shard: mc.shard, seqno: args.seq });
+      return {
+        seq: args.seq,
+        shards
+      }
+    },
   },
 };
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  plugins: [ApolloServerPluginLandingPageProductionDefault({ footer: false })]
+  plugins: [ApolloServerPluginLandingPageGraphQLPlayground()]
 });
 
 server.listen(3000).then(({ url }) => {
