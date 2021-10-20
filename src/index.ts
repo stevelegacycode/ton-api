@@ -19,6 +19,14 @@ const typeDefs = gql`
     seq: Int!
     workchain: Int!
     shard: String!
+    transactions: [Transaction!]!
+  }
+
+  type Transaction {
+    id: ID!
+    lt: String!
+    hash: String!
+    address: String!
   }
 
   type Query {
@@ -32,7 +40,22 @@ const resolvers = {
   },
   Shard: {
     id: (src: any) => 'shard:' + src.workchain + ':' + src.shard + ':' + src.seqno,
-    seq: (src: any) => src.seqno
+    seq: (src: any) => src.seqno,
+    transactions: async (src: any) => {
+      // No transactions in non-initied chain
+      if (src.seqno <= 0) {
+        return [];
+      }
+      let res = await client.getShardTransactions(src.workchain, src.seqno, src.shard);
+      return res.map((v) => ({
+        address: v.account.toFriendly(),
+        lt: v.lt,
+        hash: v.hash
+      }))
+    }
+  },
+  Transaction: {
+    id: (src: any) => 'tx:' + src.lt + ':' + src.hash + ':' + src.address,
   },
   Query: {
     block: async (_: any, args: { seq: number }) => {
