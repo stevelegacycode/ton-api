@@ -6,10 +6,9 @@ import { indexBlockGeneric } from "./workers/indexBlockGeneric";
 import { TonIndexer } from "../model/entities";
 import { tonClient } from "../ton/tonClient";
 
-function startIndexer(name: string, version: number, handler: (tx: EntityManager, block: TonBlock) => Promise<void>) {
+const BATCH_SIZE = 1000;
 
-
-
+function startIndexer(name: string, version: number, handler: (tx: EntityManager, blocks: TonBlock[]) => Promise<void>) {
     backoff(async () => {
 
         let latestKnownSeq = (await tonClient.getMasterchainInfo()).latestSeqno;
@@ -20,34 +19,52 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
             let r = await inTx(async (tx) => {
 
                 // Resolve cursor
-                let seqno: number;
+                let seqnoStart: number;
+                let seqnoEnd: number;
                 let indexer = await tx.findOne(TonIndexer, { where: { name } });
                 if (!indexer) {
-                    seqno = 1;
-                    await tx.insert(TonIndexer, { name, version, seq: 1 });
+                    seqnoStart = 1;
+                    seqnoEnd = Math.min(seqnoStart + BATCH_SIZE, latestKnownSeq);
+                    if (seqnoStart >= latestKnownSeq) {
+                        return false;
+                    }
+
+                    // Insert new seq and version
+                    await tx.insert(TonIndexer, { name, version, seq: seqnoEnd });
                 } else if (indexer.version === version) {
-                    seqno = indexer.seq + 1;
-                    indexer.seq++;
+                    seqnoStart = indexer.seq + 1;
+                    seqnoEnd = Math.min(seqnoStart + BATCH_SIZE, latestKnownSeq);
+                    if (seqnoStart >= latestKnownSeq) {
+                        return false;
+                    }
+
+                    // Update seq
+                    indexer.seq = seqnoEnd;
                     await tx.save(indexer);
                 } else if (indexer.version < version) {
-                    seqno = 1;
-                    indexer.seq = 1;
+                    seqnoStart = 1;
+                    seqnoEnd = Math.min(seqnoStart + BATCH_SIZE, latestKnownSeq);
+                    if (seqnoStart >= latestKnownSeq) {
+                        return false;
+                    }
+
+                    // Update seq and version
+                    indexer.seq = seqnoEnd;
                     indexer.version = version;
                     await tx.save(indexer);
                 } else {
                     throw Error('Incompatible version');
                 }
 
-                // What if we reached latest
-                if (seqno >= latestKnownSeq) {
-                    return false;
-                }
-
                 // Load block
-                let block = await fetchBlock(seqno);
+                let blocksPromises: Promise<TonBlock>[] = [];
+                for (let s = seqnoStart; s <= seqnoEnd; s++) {
+                    blocksPromises.push(fetchBlock(s));
+                }
+                let blocks = await Promise.all(blocksPromises);
 
                 // Handle
-                await handler(tx, block);
+                await handler(tx, blocks);
 
                 return true;
             });
