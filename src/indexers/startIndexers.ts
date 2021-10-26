@@ -85,5 +85,5 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
 export async function startIndexers() {
     console.log('Starting indexers');
     startIndexer('block_generic', 1, indexBlockGeneric);
-    startIndexer('block_tx', 1, indexBlockTx);
+    startIndexer('block_tx', 2, indexBlockTx);
 }

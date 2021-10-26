@@ -47,7 +47,7 @@ const shardLoader = new DataLoader<TonShardDef, TonShard, string>(async (src) =>
             };
         }
     }));
-}, { cacheKeyFn: (src) => src.workchain + ':' + src.shard + ':' + src.shard });
+}, { cacheKeyFn: (src) => src.workchain + ':' + src.shard + ':' + src.seqno });
 
 const blockLoader = new DataLoader<number, TonBlock>(async (src) => {
     return Promise.all(src.map(async (seqno) => {
