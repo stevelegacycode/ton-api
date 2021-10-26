@@ -1,6 +1,7 @@
 import { parse } from 'pg-connection-string';
 import { createConnection } from 'typeorm';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import { allEntities } from './entities';
 
 export function loadDigitalOceanConnection(src: string): PostgresConnectionOptions {
     let res = parse(src);
@@ -18,7 +19,7 @@ export function loadDigitalOceanConnection(src: string): PostgresConnectionOptio
 export async function startModel() {
     await createConnection({
         ...loadDigitalOceanConnection(process.env.DATABASE_URL!),
-        entities: [],
+        entities: allEntities,
         synchronize: false,
         dropSchema: false,
         migrationsRun: false,

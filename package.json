@@ -11,9 +11,11 @@
     "dev": "yarn build && yarn start"
   },
   "dependencies": {
+    "@openland/patterns": "^0.0.2",
     "@openland/secure-id": "^0.1.2",
     "@types/node": "^16.11.1",
     "apollo-server": "^3.4.0",
+    "dataloader": "^2.0.0",
     "graphql": "^15.6.1",
     "pg": "^8.7.1",
     "pg-connection-string": "^2.5.0",
