@@ -3,7 +3,8 @@ import { TonBlockEntity } from "../../model/entities";
 import { TonBlock } from "../../ton/fetchBlock";
 
 export async function indexBlockTx(tx: EntityManager, blocks: TonBlock[]) {
-    for (let block of blocks) {
+
+    await Promise.all(blocks.map(async (block) => {
 
         // Calculate stats
         let stat_tx = 0;
@@ -34,5 +35,5 @@ export async function indexBlockTx(tx: EntityManager, blocks: TonBlock[]) {
             bl.stat_tx_wc = stat_tx_wc;
             await tx.save(bl);
         }
-    }
+    }));
 }

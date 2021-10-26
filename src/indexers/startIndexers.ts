@@ -58,6 +58,7 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                 }
 
                 // Load block
+                let start = Date.now();
                 let blocksPromises: Promise<TonBlock>[] = [];
                 for (let s = seqnoStart; s <= seqnoEnd; s++) {
                     blocksPromises.push(fetchBlock(s));
@@ -65,10 +66,12 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                 let blocks = await Promise.all(blocksPromises);
 
                 // Indexing
-                console.log(`[${name}]: Indexing ${seqnoStart}-${seqnoEnd}`);
+                console.log(`[${name}]: Loaded ${seqnoStart}-${seqnoEnd} in ${Date.now() - start} ms`);
 
                 // Handle
+                start = Date.now();
                 await handler(tx, blocks);
+                console.log(`[${name}]: Indexed ${seqnoStart}-${seqnoEnd} in ${Date.now() - start} ms`);
 
                 return true;
             });
