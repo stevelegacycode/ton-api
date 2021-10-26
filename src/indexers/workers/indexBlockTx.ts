@@ -35,8 +35,4 @@ export async function indexBlockTx(tx: EntityManager, blocks: TonBlock[]) {
             await tx.save(bl);
         }
     }));
-    for (let b of blocks) {
-
-        console.log('Indexing block: ' + b.seqno);
-    }
 }

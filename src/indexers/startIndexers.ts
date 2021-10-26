@@ -64,6 +64,9 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                 }
                 let blocks = await Promise.all(blocksPromises);
 
+                // Indexing
+                console.log(`[${name}]: Indexing ${seqnoStart}-${seqnoEnd}`);
+
                 // Handle
                 await handler(tx, blocks);
 
