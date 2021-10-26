@@ -3,7 +3,7 @@ import { inTx } from "../inTx";
 import { backoff, delay } from '@openland/patterns';
 import { fetchBlock, TonBlock } from "../ton/fetchBlock";
 import { indexBlockGeneric } from "./workers/indexBlockGeneric";
-import { TonIndexer } from "../model/entities";
+import { TonIndexerEntity } from "../model/entities";
 import { tonClient } from "../ton/tonClient";
 
 const BATCH_SIZE = 20;
@@ -21,7 +21,7 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                 // Resolve cursor
                 let seqnoStart: number;
                 let seqnoEnd: number;
-                let indexer = await tx.findOne(TonIndexer, { where: { name } });
+                let indexer = await tx.findOne(TonIndexerEntity, { where: { name } });
                 if (!indexer) {
                     seqnoStart = 1;
                     seqnoEnd = Math.min(seqnoStart + BATCH_SIZE, latestKnownSeq);
@@ -30,7 +30,7 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                     }
 
                     // Insert new seq and version
-                    await tx.insert(TonIndexer, { name, version, seq: seqnoEnd });
+                    await tx.insert(TonIndexerEntity, { name, version, seq: seqnoEnd });
                 } else if (indexer.version === version) {
                     seqnoStart = indexer.seq + 1;
                     seqnoEnd = Math.min(seqnoStart + BATCH_SIZE, latestKnownSeq);
