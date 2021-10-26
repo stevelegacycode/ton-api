@@ -6,7 +6,7 @@ import { indexBlockGeneric } from "./workers/indexBlockGeneric";
 import { TonIndexer } from "../model/entities";
 import { tonClient } from "../ton/tonClient";
 
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = 20;
 
 function startIndexer(name: string, version: number, handler: (tx: EntityManager, blocks: TonBlock[]) => Promise<void>) {
     backoff(async () => {
