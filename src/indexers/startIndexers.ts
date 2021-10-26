@@ -39,7 +39,7 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                 }
 
                 // What if we reached latest
-                if (seqno === latestKnownSeq) {
+                if (seqno >= latestKnownSeq) {
                     return false;
                 }
 
