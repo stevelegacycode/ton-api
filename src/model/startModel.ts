@@ -23,7 +23,7 @@ export async function startModel() {
         synchronize: false,
         dropSchema: false,
         migrationsRun: false,
-        logging: ['query'],
+        logging: 'all',
         // logger: new PinoORMLogger(createLogger('orm'))
     });
 }
