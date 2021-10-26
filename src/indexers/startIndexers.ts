@@ -4,13 +4,20 @@ import { backoff, delay } from '@openland/patterns';
 import { fetchBlock, TonBlock } from "../ton/fetchBlock";
 import { indexBlockGeneric } from "./workers/indexBlockGeneric";
 import { TonIndexer } from "../model/entities";
+import { tonClient } from "../ton/tonClient";
 
 function startIndexer(name: string, version: number, handler: (tx: EntityManager, block: TonBlock) => Promise<void>) {
+
+
+
     backoff(async () => {
+
+        let latestKnownSeq = (await tonClient.getMasterchainInfo()).latestSeqno;
+
         while (true) {
 
             // Do iteration
-            await inTx(async (tx) => {
+            let r = await inTx(async (tx) => {
 
                 // Resolve cursor
                 let seqno: number;
@@ -31,15 +38,25 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
                     throw Error('Incompatible version');
                 }
 
+                // What if we reached latest
+                if (seqno === latestKnownSeq) {
+                    return false;
+                }
+
                 // Load block
                 let block = await fetchBlock(seqno);
 
                 // Handle
                 await handler(tx, block);
+
+                return true;
             });
 
-            // Delay
-            await delay(1000);
+            // Refresh seq
+            if (!r) {
+                await delay(1000);
+                latestKnownSeq = (await tonClient.getMasterchainInfo()).latestSeqno;
+            }
         }
     });
 }
