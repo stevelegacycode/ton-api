@@ -15,6 +15,7 @@
     "@types/node": "^16.11.1",
     "apollo-server": "^3.4.0",
     "graphql": "^15.6.1",
+    "pg": "^8.7.1",
     "pg-connection-string": "^2.5.0",
     "pino": "^7.0.5",
     "ton": "^4.19.0",
