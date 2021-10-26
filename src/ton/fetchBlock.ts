@@ -29,7 +29,7 @@ const shardsLoader = new DataLoader<number, TonShardDef[]>(async (src) => {
 
 const shardLoader = new DataLoader<TonShardDef, TonShard, string>(async (src) => {
     return Promise.all(src.map(async (def) => {
-        let tx = await tonClient.getShardTransactions(-1, 0, '-9223372036854775808');
+        let tx = await tonClient.getShardTransactions(def.workchain, def.seqno, def.shard);
         let transactions = await Promise.all(tx.map(async (v) => ({ address: v.account, tx: await fetchTransaction(v.account, v.lt, v.hash) })));
         return {
             workchain: def.workchain,
