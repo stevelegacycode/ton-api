@@ -36,7 +36,7 @@ export function beforeCommit(tx: Tx, handler: () => any | Promise<any>) {
 
 export async function inTx<T>(handler: (tx: Tx) => Promise<T>): Promise<T> {
     let state = createState();
-    let txRes = await getConnection().transaction('SERIALIZABLE', async (tx) => {
+    let txRes = await getConnection().transaction('REPEATABLE READ', async (tx) => {
         (tx as any)[stateSymbol] = state;
 
         let res = await handler(tx);
