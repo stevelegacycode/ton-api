@@ -23,7 +23,6 @@ export type TonBlock = {
 
 const shardsLoader = new DataLoader<number, TonShardDef[]>(async (src) => {
     return await Promise.all(src.map(async (seqno) => {
-        console.warn(seqno);
         return await tonClient.getWorkchainShards(seqno);
     }));
 });
@@ -56,7 +55,6 @@ const blockLoader = new DataLoader<number, TonBlock>(async (src) => {
         // Load shard defs
         let shardDefs = await shardsLoader.load(seqno);
         shardDefs = [{ workchain: -1, seqno, shard: '-9223372036854775808' }, ...shardDefs];
-        console.warn('shards loaded');
 
         // Load shards
         let shards = await Promise.all(shardDefs.map((shard) => {
