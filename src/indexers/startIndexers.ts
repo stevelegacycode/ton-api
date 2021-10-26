@@ -5,6 +5,7 @@ import { fetchBlock, TonBlock } from "../ton/fetchBlock";
 import { indexBlockGeneric } from "./workers/indexBlockGeneric";
 import { TonIndexerEntity } from "../model/entities";
 import { tonClient } from "../ton/tonClient";
+import { indexBlockTx } from "./workers/indexBlockTx";
 
 const BATCH_SIZE = 20;
 
@@ -81,4 +82,5 @@ function startIndexer(name: string, version: number, handler: (tx: EntityManager
 export async function startIndexers() {
     console.log('Starting indexers');
     startIndexer('block_generic', 1, indexBlockGeneric);
+    startIndexer('block_tx', 1, indexBlockTx);
 }
